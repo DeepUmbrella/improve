@@ -1,6 +1,9 @@
+name: Git Action Test
+
 on:
   push:
     branches: ["git-action"]
+
   workflow_dispatch:
     inputs:
       environment:
