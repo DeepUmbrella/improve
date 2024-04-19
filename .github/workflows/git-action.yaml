@@ -8,13 +8,18 @@ on:
   push:
     branches: ["git-action"]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+env:
+  DOCKER_KEY: ${{ secrets.DOCKER_KEY }}
+  # Allows you to run this workflow manually from the Actions tab
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   prod-check:
     if: ${{ github.ref == 'refs/heads/main' }}
+
     runs-on: ubuntu-latest
+
     steps:
-      - run: echo "Deploying to production server on branch $GITHUB_REF"
+      - run: echo "Deploying to production server on branch ${{ env.DOCKER_KEY }} ${{ vars.PUBLISH_HOST }}"
