@@ -1,0 +1,23 @@
+{
+  "name": "imporve",
+  "version": "1.0.0",
+  "description": "one small step every day ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "example": "node ./cicd/git-actions/example.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeepUmbrella/improve.git"
+  },
+  "keywords": [
+    "yannil"
+  ],
+  "author": "yannil",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DeepUmbrella/improve/issues"
+  },
+  "homepage": "https://github.com/DeepUmbrella/improve#readme"
+}
