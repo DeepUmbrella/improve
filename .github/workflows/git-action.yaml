@@ -21,6 +21,7 @@ jobs:
 
     env:
       DOCKER_KEY: ${{ secrets.DOCKER_KEY }}
+      PUBLISH_HOST: ${{ vars.PUBLISH_HOST }}
 
     steps:
-      - run: echo "Deploying to production server on branch ${{ env.DOCKER_KEY }} ${{ vars.PUBLISH_HOST }}"
+      - run: echo "Deploying to production server on branch $DOCKER_KEY $PUBLISH_HOST"
