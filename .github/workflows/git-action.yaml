@@ -2,17 +2,16 @@ name: Git Action Test
 
 on:
   push:
-    branches: ["main"]
+    branches: ["git-action"]
 
   workflow_dispatch:
     inputs:
       environment:
         description: "Environment to deploy"
         required: true
-        default: production
 jobs:
   prod-check:
-    if: ${{ github.ref == 'refs/heads/mian' }}
+    if: ${{ github.ref == 'refs/heads/git-action' }}
     environment: ${{ github.event.inputs.environment }}
     runs-on: ubuntu-latest
 
