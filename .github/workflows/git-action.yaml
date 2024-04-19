@@ -1,22 +1,15 @@
-# This is a basic workflow to help you get started with Actions
-
-name: git action workflow
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: ["git-action"]
-
   workflow_dispatch:
-
-  # Allows you to run this workflow manually from the Actions tab
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
 jobs:
   prod-check:
     if: ${{ github.ref == 'refs/heads/git-action' }}
-    environment: stage
+    environment: ${{ github.event.inputs.environment }}
     runs-on: ubuntu-latest
 
     env:
