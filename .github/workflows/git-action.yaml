@@ -25,3 +25,9 @@ jobs:
 
     steps:
       - run: echo "Deploying to production server on branch $DOCKER_KEY $PUBLISH_HOST"
+
+      - shell: bash
+        env:
+          SUPER_SECRET: ${{ secrets.DOCKER_KEY }}
+        run: |
+          example-command "$SUPER_SECRET"
