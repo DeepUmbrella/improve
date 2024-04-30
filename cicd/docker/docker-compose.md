@@ -76,3 +76,86 @@ networks:
   cd composetest
 
 ```
+
+# use custom compose file
+
+```sh
+  docker compose up
+  # background run compose
+  docker compose up -d
+
+
+  docker compose -f <path of compose.yaml> up
+
+```
+
+# watch file change
+
+```sh
+  docker compose watch
+
+```
+
+# stop compose
+
+```sh
+  docker compose stop
+
+
+```
+
+# delete compose
+
+```sh
+  # remove all container and content
+  docker compose down
+
+```
+
+# docker env file and defined env
+
+```sh
+
+DEBUG=dugvalue
+# run to use DEBUG var in Yaml file
+docker compose up
+
+```
+
+then config follow this yaml
+
+```yaml
+services:
+  web:
+    image: example:11
+    environment:
+      - ENVNAME=${DEBUG}
+      - ENVNAME1=env_value
+```
+
+or use env-file filed
+
+```sh
+cat .env
+TAG=v1.5
+```
+
+then follow using
+
+```yaml
+services:
+  web:
+    image: example:1.1
+    env-file: ./env
+```
+
+# compose profile
+
+```sh
+  docker compose --profile <profiletag> up
+  # way2
+  COMPOSE_PROFILES=frontend,debug docker compose up
+  ## start all service
+
+
+```
