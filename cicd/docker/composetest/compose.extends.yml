@@ -1,0 +1,12 @@
+name: extends-test-name
+
+services:
+  web:
+    # there will be use  compose.profiles.yml config to setup web service
+    # and then use service web to extend it
+    extends:
+      file: ./compose.profiles.yml
+      service: web
+
+  redis:
+    image: "redis:alpine"
