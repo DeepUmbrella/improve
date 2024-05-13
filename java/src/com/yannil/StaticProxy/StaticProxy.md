@@ -1,0 +1,8 @@
+# USE Static Proxy
+
+```java
+
+
+
+
+```
