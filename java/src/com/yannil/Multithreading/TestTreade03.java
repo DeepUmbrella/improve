@@ -35,7 +35,7 @@ class CallableTest implements Callable<String> {
 
   @Override
   public String call() throws Exception {
-    System.out.println("call ");
+    System.out.println("call");
     return "call";
   }
 

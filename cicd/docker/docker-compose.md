@@ -146,7 +146,7 @@ then follow using
 services:
   web:
     image: example:1.1
-    env-file: ./env
+    env_file: ./env
 ```
 
 # compose profile
