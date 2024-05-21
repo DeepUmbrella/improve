@@ -1,4 +1,4 @@
-package com.yannil.Multithreading;
+package com.yannil.Thread.Multithreading;
 
 public class TestThread03 {
   public static void main(String[] args) {

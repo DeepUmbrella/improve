@@ -1,4 +1,4 @@
-package com.yannil.StaticProxy;
+package com.yannil.Thread.StaticProxy;
 
 public class StaticProxy {
   public static void main(String[] args) {

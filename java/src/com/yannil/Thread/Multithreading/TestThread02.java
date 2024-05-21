@@ -1,4 +1,4 @@
-package com.yannil.Multithreading;
+package com.yannil.Thread.Multithreading;
 
 import java.io.File;
 import java.io.IOException;

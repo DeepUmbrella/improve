@@ -1,4 +1,4 @@
-package com.yannil.Multithreading;
+package com.yannil.Thread.Multithreading;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -39,4 +39,18 @@ class CallableTest implements Callable<String> {
     return "call";
   }
 
+}
+
+// 只能输入数字，不能输入其他字符的正则
+
+/**
+ * InnerTestTreade03
+ */
+class RgexTest {
+
+  public static void main(String[] args) {
+
+    String str = "123";
+    System.out.println(str.matches("\\d+"));
+  }
 }

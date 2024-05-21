@@ -1,4 +1,4 @@
-package com.yannil.Multithreading;
+package com.yannil.Thread.Multithreading;
 
 public class TestThread01 extends Thread {
   @Override
