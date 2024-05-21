@@ -1,0 +1,9 @@
+include:
+  - path:
+      - compose.profiles.yaml
+services:
+  # this will override the compose.profiles.yaml
+  web:
+    build: .
+    depends_on:
+      - redis # from compose.profile.yaml
