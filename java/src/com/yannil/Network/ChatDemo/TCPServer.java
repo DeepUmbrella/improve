@@ -1,8 +1,10 @@
 package com.yannil.Network.ChatDemo;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -20,17 +22,8 @@ public class TCPServer {
         System.out.println("wait connecting .....");
         socket = serverSocket.accept();
         System.out.println("connected success .....");
-        sInputStream = socket.getInputStream();
 
-        baop = new ByteArrayOutputStream();
-
-        byte[] buffer = new byte[16];
-
-        int len;
-        while ((len = sInputStream.read(buffer)) != -1) {
-          baop.write(buffer, 0, len);
-        }
-        System.out.println(baop.toString() + "555555");
+        new ClientHandler(socket).start();
       }
 
     } catch (IOException e) {
@@ -73,4 +66,32 @@ public class TCPServer {
     }
   }
 
+}
+
+class ClientHandler extends Thread {
+  private Socket socket;
+
+  public ClientHandler(Socket socket) {
+    this.socket = socket;
+  }
+
+  public void run() {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+      String message;
+      while ((message = reader.readLine()) != null) {
+        System.out.println("Received: " + message);
+        // 在这里处理接收到的消息
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        if (socket != null) {
+          socket.close();
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
 }

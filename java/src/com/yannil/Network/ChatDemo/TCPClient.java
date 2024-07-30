@@ -19,18 +19,18 @@ public class TCPClient {
       int port = 9528;
 
       socket = new Socket(serverIp, port);
-      input = new BufferedReader(new InputStreamReader(System.in));
-      while (true) {
+      os = socket.getOutputStream();
 
+      while (true) {
+        input = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("please enter: \t");
         String inputString = input.readLine();
         System.out.println("your input :" + inputString);
-        byte[] str = inputString.getBytes();
-        os = socket.getOutputStream();
+        byte[] str = (inputString + "\n").getBytes();
 
         os.write(str);
-
         os.flush();
+
       }
 
     } catch (Exception e) {
