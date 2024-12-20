@@ -4,6 +4,7 @@
   "description": "one small step every day ",
   "main": "index.js",
   "scripts": {
+    "start:angular": "cd ./frontend_framework/angular/angulardemo && npm run start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "example": "node ./cicd/git-actions/example.js"
   },

@@ -1,0 +1,9 @@
+<div>
+    <h2>TODO LIST :{{name()}}</h2>
+    <button (click)="updateTodoList()">update todo list</button>
+    <div>
+        @for (listData of todoListTodo() ;track listData) {
+        <todo-list-item />
+        }
+    </div>
+</div>
