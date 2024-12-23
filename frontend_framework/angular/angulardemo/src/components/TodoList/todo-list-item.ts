@@ -9,6 +9,8 @@ import { Component, Input } from '@angular/core'
 export class TodoListItem {
     taskTitle = 'the task'
     isComplete = false
+    @Input() todoDate = ''
+    @Input() assigned = ''
 
     completeTask() {
         this.isComplete = !this.isComplete

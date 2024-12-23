@@ -1,0 +1,22 @@
+<div class="util" [className]="'util'">
+    <h1>&#64;output event communication</h1>
+    <div>current Number :{{ count}}</div>
+    <div>
+        <SumItem
+            (incrementCountEvent)="onIncrementCount($event)"
+            [value]="2"
+        ></SumItem>
+        <SumItem
+            (incrementCountEvent)="onIncrementCount($event)"
+            [value]="4"
+        ></SumItem>
+        <SumItem
+            (incrementCountEvent)="onIncrementCount($event)"
+            [value]="1"
+        ></SumItem>
+        <SumItem
+            (incrementCountEvent)="onIncrementCount($event)"
+            [value]="3"
+        ></SumItem>
+    </div>
+</div>

@@ -1,4 +1,9 @@
 <li class="flex">
-    <div>{{taskTitle}} is {{isComplete?"complete":"in progress"}}</div>
+    <div>
+        {{taskTitle}} is {{isComplete?"complete":"in progress"}} : {{todoDate}}
+    </div>
+    <div>
+        <h1>current work on {{assigned||"nobody"}}</h1>
+    </div>
     <button (click)="completeTask()">switch status</button>
 </li>

@@ -10,7 +10,10 @@ import { TodoListItem } from './todo-list-item'
 })
 export class TodoList {
     name = signal('2024.13')
-    todoList = signal(new Array(5).map((_, index) => index))
+    assigned = signal('')
+    todoList = signal(
+        new Array(5).fill('todo list').map((_, index) => `todo list ${index}`)
+    )
 
     todoListTodo = computed(() => {
         console.log('todo list updating')
@@ -18,6 +21,13 @@ export class TodoList {
     })
 
     updateTodoList() {
-        this.todoList.update((originalArr) => [...originalArr, 9, 10])
+        this.todoList.update((originalArr) => [
+            ...originalArr,
+            'todo list most',
+            'todo list lost',
+        ])
+    }
+    updateAssigned(user: string) {
+        this.assigned.set(user)
     }
 }

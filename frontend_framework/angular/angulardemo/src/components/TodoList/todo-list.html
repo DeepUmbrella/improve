@@ -1,9 +1,11 @@
 <div>
     <h2>TODO LIST :{{name()}}</h2>
+
     <button (click)="updateTodoList()">update todo list</button>
+    <button (click)="updateAssigned('angular')">assign to angular</button>
     <div>
         @for (listData of todoListTodo() ;track listData) {
-        <todo-list-item />
+        <todo-list-item [todoDate]="name()" [assigned]="assigned()" />
         }
     </div>
 </div>
