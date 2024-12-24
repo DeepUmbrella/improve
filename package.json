@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start:angular": "cd ./frontend_framework/angular/angulardemo && npm run start",
+    "start:rsreact": "cd ./frontend_framework/react/manulife-pro-react && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1",
     "example": "node ./cicd/git-actions/example.js"
   },

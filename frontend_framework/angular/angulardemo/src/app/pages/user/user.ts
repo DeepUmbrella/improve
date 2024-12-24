@@ -16,7 +16,7 @@ import { RouterLink } from '@angular/router'
         </div>
     `,
 })
-export class UserComponent implements OnInit {
+export class UserPageComponent implements OnInit {
     constructor() {}
 
     ngOnInit() {}

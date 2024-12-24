@@ -6,7 +6,7 @@ import { Component, Input, OnInit } from '@angular/core'
     selector: 'user-detail',
     templateUrl: './user-detail.component.html',
 })
-export class UserDetailComponent implements OnInit {
+export class UserDetailPageComponent implements OnInit {
     @Input() userId = ''
 
     constructor() {}

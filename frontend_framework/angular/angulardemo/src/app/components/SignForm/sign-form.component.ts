@@ -3,10 +3,10 @@ import { Component, OnInit } from '@angular/core'
 @Component({
     standalone: true,
     imports: [],
-    selector: '',
-    template: '',
+    selector: 'SignForm',
+    templateUrl: './sign-form.component.html',
 })
-export class LayoutDefaultComponent implements OnInit {
+export class SignFormComponent implements OnInit {
     constructor() {}
 
     ngOnInit() {}

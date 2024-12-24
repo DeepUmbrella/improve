@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core'
-import { CalculatorService } from '../../services/calculator-service'
+import { CalculatorService } from '@services/calculator-service'
 
 @Component({
     selector: 'receipt',

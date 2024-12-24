@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core'
-import { UserControls } from '../UserControls/user-controls'
+import { UserControlsComponent } from '../UserControls/user-controls'
 
 @Component({
     standalone: true,
-    imports: [UserControls],
+    imports: [UserControlsComponent],
     selector: 'user-profile',
     templateUrl: './user-profile.component.html',
 })
-export class UserProfile implements OnInit {
+export class UserProfileComponent implements OnInit {
     constructor() {}
 
     ngOnInit() {}

@@ -12,7 +12,7 @@ import { Component, OnInit } from '@angular/core'
         }
     `,
 })
-export class UserControls implements OnInit {
+export class UserControlsComponent implements OnInit {
     isAdmin = true
     constructor() {}
 
