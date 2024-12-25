@@ -1,0 +1,25 @@
+.time-bar {
+    flex: 1;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI';
+    font-size: 25rem;
+    font-weight: bold;
+
+    color: aliceblue;
+    .time-string {
+        background-image: linear-gradient(
+            to right,
+            rgb(236, 73, 153),
+            rgb(239, 68, 68),
+            rgb(234, 179, 8)
+        );
+        background-clip: text;
+        -webkit-text-stroke-width: 20px;
+        -webkit-text-stroke-color: transparent;
+        color: transparent;
+    }
+}

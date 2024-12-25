@@ -1,0 +1,8 @@
+.global-header {
+    display: flex;
+    min-height: 64px;
+    background-color: var(--bg-color);
+    .neon-time {
+        width: 100%;
+    }
+}

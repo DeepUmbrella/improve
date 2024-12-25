@@ -14,6 +14,7 @@ import {
     standalone: true,
     selector: 'HomePage',
     templateUrl: './home.html',
+    styleUrl: './home-page.component.scss',
     imports: [
         RouterLink,
         TodoList,

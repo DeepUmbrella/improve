@@ -23,7 +23,6 @@ export const routes: Routes = [
         title: 'App User page',
         component: UserDetailPageComponent,
     },
-
     {
         path: '**',
         title: '404 Not Found Page',
