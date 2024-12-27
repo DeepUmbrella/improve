@@ -5,6 +5,8 @@ import {
     UserPageComponent,
     UserDetailPageComponent,
     NotFoundPageComponent,
+    SignInComponent,
+    SignUpComponent,
 } from '@pages'
 
 export const routes: Routes = [
@@ -17,6 +19,16 @@ export const routes: Routes = [
         path: 'user',
         title: 'App User page',
         component: UserPageComponent,
+    },
+    {
+        path: 'signin',
+        title: 'App Sign In',
+        component: SignInComponent,
+    },
+    {
+        path: 'signup',
+        title: 'App Sign In',
+        component: SignUpComponent,
     },
     {
         path: 'user/:user-id',

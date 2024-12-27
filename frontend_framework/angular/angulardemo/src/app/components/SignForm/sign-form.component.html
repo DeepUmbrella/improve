@@ -1,0 +1,23 @@
+<form class="sign-form" [formGroup]="profileForm" (ngSubmit)="handleSubmit()">
+    <label class="field pointer" for="name">
+        Name: <input id="name" formControlName="name" type="text" />
+    </label>
+    <label class="field pointer" for="email">
+        Email: <input id="email" formControlName="email" type="email" />
+    </label>
+    <button
+        class="pointer submit"
+        type="submit"
+        [disabled]="!profileForm.valid"
+    >
+        Submit
+    </button>
+</form>
+<div>
+    <h1>PreView Form Info</h1>
+    <h2>Profile Form</h2>
+    <p>Name: {{ profileForm.value.name }}</p>
+    <p>Email: {{ profileForm.value.email }}</p>
+    <p>Car: {{ carType }}</p>
+    <p>Reverse Car: {{ carType | reverse | uppercase }}</p>
+</div>

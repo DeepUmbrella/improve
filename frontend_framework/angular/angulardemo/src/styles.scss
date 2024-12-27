@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @import './app/styles/theme';
+* {
+    box-sizing: border-box;
+}
 
 :host {
     --bright-blue: oklch(51.01% 0.274 263.83);
@@ -80,4 +83,8 @@ body {
     padding: 10px;
     border: 1px solid black;
     width: 40%;
+}
+
+.pointer {
+    cursor: pointer;
 }
