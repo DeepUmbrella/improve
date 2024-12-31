@@ -6,8 +6,7 @@ import { CommonModule } from '@angular/common'
 
     imports: [CommonModule],
     template: ` <div
-        class="{{ role_type }}"
-        [style.borderColor]="border_color"
+        [ngClass]="[role_type, 'default']"
         [ngStyle]="role_style"
     ></div>`,
     styleUrl: './role.component.scss',
@@ -15,8 +14,7 @@ import { CommonModule } from '@angular/common'
 export class RoleComponent {
     @Input()
     role_style = {}
-    @Input()
-    border_color = 'red'
+
     @Input()
     role_type = 'default'
 }

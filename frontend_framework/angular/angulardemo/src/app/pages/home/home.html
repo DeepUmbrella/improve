@@ -1,10 +1,17 @@
 <div class="home-page">
-    <div class="client_window">
+    <canvas #client_window class="client_window"></canvas>
+    <!-- <div class="client_window">
+        @for (item of resultdemo; track $index) {
         <app-role
-            [role_type]="'role'"
-            [role_style]="role_pos()"
-            border_color="green"
+            [role_type]="item.name"
+            [role_style]="getXYWH(item.box)"
         ></app-role>
-        <app-role [role_style]="monster_pos()" border_color="red"></app-role>
-    </div>
+        }
+        <app-role
+            role_type="monster_collection"
+            [role_style]="getMonsterCollectionBox(monsterNameList,resultdemo)"
+        >
+        </app-role>
+        <app-role role_type="jianmo"> </app-role>
+    </div> -->
 </div>

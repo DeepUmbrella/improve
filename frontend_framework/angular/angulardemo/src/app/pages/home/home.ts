@@ -1,4 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core'
+import {
+    Component,
+    OnInit,
+    signal,
+    AfterViewInit,
+    ViewChild,
+    ElementRef,
+} from '@angular/core'
 import { RouterLink } from '@angular/router'
 import {
     Receipt,
@@ -10,6 +17,20 @@ import {
     OptImage,
     RoleComponent,
 } from '@components'
+type BoundingBox = {
+    x1: number
+    x2: number
+    y1: number
+    y2: number
+}
+interface Result {
+    class: number
+    name: string
+    box: BoundingBox
+    confidence: number
+}
+
+type Position = [x: number, y: number, w: number, h: number]
 
 @Component({
     standalone: true,
@@ -18,9 +39,10 @@ import {
     styleUrl: './home-page.component.scss',
     imports: [RoleComponent],
 })
-export class HomePageComponent implements OnInit {
-    role_pos = signal({ top: '0px', left: '0px' })
-    monster_pos = signal({ top: '0px', left: '0px' })
+export class HomePageComponent implements OnInit, AfterViewInit {
+    @ViewChild('client_window') canvasElement!: ElementRef<HTMLCanvasElement>
+
+    monsterNameList = ['nvmanyou', 'xiazi', 'jianhun', 'nanwuji']
     resultdemo = [
         {
             name: 'nvmanyou',
@@ -144,17 +166,97 @@ export class HomePageComponent implements OnInit {
             },
         },
     ]
-    update_role_position(left: number, top: number) {
-        this.role_pos.set({
-            top: `${top}px`,
-            left: `${left}px`,
-        })
+    getXYWH(box: { x1: number; y1: number; x2: number; y2: number }): Position {
+        const { x1, x2, y1, y2 } = box
+        return [x1, y1, x2 - x1, y2 - y1]
     }
-    update_monster_position(left: number, top: number) {
-        this.role_pos.set({
-            top: `${top}px`,
-            left: `${left}px`,
+
+    getMonsterCollectionBox(
+        name_array: Array<string>,
+        results: Result[]
+    ): Position {
+        if (results.length == 0) {
+            return [0, 0, 0, 0]
+        }
+        let left = results[0].box.x1
+        let top = results[0].box.y1
+        let max_left = 0
+        let max_top = 0
+
+        results.forEach((item) => {
+            if (name_array.includes(item.name)) {
+                left = Math.min(left, item.box.x1)
+                top = Math.min(top, item.box.y1)
+                max_left = Math.max(max_left, item.box.x2)
+                max_top = Math.max(max_top, item.box.y2)
+            }
         })
+
+        return [left, top, max_left - left, max_top - top]
     }
-    ngOnInit() {}
+
+    generateMonster() {
+        const monsterList = []
+
+        let epoch = Math.floor(Math.random() * 5) + 5
+
+        for (let index = 0; index < epoch; index++) {
+            const x1 = 454 + Math.random() * 500
+            const y1 = 174 + Math.random() * 300
+
+            const monster: Result = {
+                class: 1,
+                name: 'xiazi',
+                confidence: 3,
+                box: {
+                    x1,
+                    x2: x1 + 44,
+                    y1,
+                    y2: y1 + 124,
+                },
+            }
+            monsterList.push(monster)
+        }
+
+        return monsterList
+    }
+
+    ngOnInit() {
+        const run = () => {
+            this.resultdemo = this.generateMonster()
+            setTimeout(run, 1000)
+        }
+        run()
+    }
+
+    ngAfterViewInit() {
+        // Access the canvas element after the view has been initialized
+        const canvas = this.canvasElement.nativeElement
+        canvas.width = 1068 // Set the width of the canvas
+        canvas.height = 600 // Set the height of the canvas'
+
+        const ctx = canvas.getContext('2d')
+
+        if (ctx) {
+            const run = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height) //
+                ctx.strokeStyle = '#FFA500'
+                this.resultdemo.forEach((item) => {
+                    ctx.strokeRect(...this.getXYWH(item.box))
+                })
+                ctx.strokeStyle = '#ff0000'
+
+                ctx.strokeRect(
+                    ...this.getMonsterCollectionBox(
+                        this.monsterNameList,
+                        this.resultdemo
+                    )
+                )
+
+                requestAnimationFrame(run)
+            }
+
+            run()
+        }
+    }
 }

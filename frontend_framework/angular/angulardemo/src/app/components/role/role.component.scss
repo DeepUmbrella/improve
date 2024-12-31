@@ -1,13 +1,23 @@
 .default {
     width: 44px;
-    height: 84px;
+    height: 44px;
     border: 1px solid greenyellow;
     position: absolute;
 }
-
-.monster {
-    width: 325px;
-    height: 154px;
-    border: 1px solid red;
-    position: absolute;
+.jianmo {
+    border-color: rgb(0, 255, 183);
+}
+.nvmanyou {
+    border-color: rgb(0, 0, 255);
+}
+.xiazi {
+    border-color: peru;
+}
+.jianhun {
+    border-color: fuchsia;
+}
+.monster_collection {
+    border-width: 4px;
+    border-color: red;
+    border-style: dashed;
 }
