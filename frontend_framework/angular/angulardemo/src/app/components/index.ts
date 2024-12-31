@@ -11,3 +11,5 @@ export { TextTransformer } from './TextTransformer/text-transformer'
 export * from './TodoList'
 export { UserControlsComponent } from './UserControls/user-controls'
 export { UserProfileComponent } from './UserProfile/user-profile'
+
+export { RoleComponent } from './role/role.component'

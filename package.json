@@ -7,7 +7,8 @@
     "start:angular": "cd ./frontend_framework/angular/angulardemo && npm run start",
     "start:rsreact": "cd ./frontend_framework/react/manulife-pro-react && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "example": "node ./cicd/git-actions/example.js"
+    "example": "node ./cicd/git-actions/example.js",
+    "sayHello": "ts-node -e 'console.log(\"Hello, world!\")'"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,11 @@
   "bugs": {
     "url": "https://github.com/DeepUmbrella/improve/issues"
   },
-  "homepage": "https://github.com/DeepUmbrella/improve#readme"
+  "homepage": "https://github.com/DeepUmbrella/improve#readme",
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2"
+  }
 }

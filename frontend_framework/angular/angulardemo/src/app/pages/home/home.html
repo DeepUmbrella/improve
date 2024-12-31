@@ -1,1 +1,10 @@
-<div class="home-page"></div>
+<div class="home-page">
+    <div class="client_window">
+        <app-role
+            [role_type]="'role'"
+            [role_style]="role_pos()"
+            border_color="green"
+        ></app-role>
+        <app-role [role_style]="monster_pos()" border_color="red"></app-role>
+    </div>
+</div>
