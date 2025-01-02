@@ -221,13 +221,7 @@ export class HomePageComponent implements OnInit, AfterViewInit {
         return monsterList
     }
 
-    ngOnInit() {
-        const run = () => {
-            this.resultdemo = this.generateMonster()
-            setTimeout(run, 1000)
-        }
-        run()
-    }
+    ngOnInit() {}
 
     ngAfterViewInit() {
         // Access the canvas element after the view has been initialized

@@ -1,0 +1,28 @@
+{
+  "skillList": [
+    {
+      "id": "dabeng",
+      "type": "center",
+      "range": [
+        400,
+        300
+      ],
+      "releaseQuickKeyboard": "a",
+      "compositionKeyboards": "",
+      "coolTime": 5,
+      "level": 40
+    },
+    {
+      "id": "xiaobeng",
+      "type": "default",
+      "range": [
+        300,
+        300
+      ],
+      "releaseQuickKeyboard": "a",
+      "compositionKeyboards": "",
+      "coolTime": 5,
+      "level": 35
+    }
+  ]
+}
