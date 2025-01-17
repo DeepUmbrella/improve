@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Three js App</title>
+        <style>
+            body {
+                margin: 0;
+                background: #f0f0f0;
+            }
+            .bg {
+                width: 256px;
+                height: 256px;
+                background-color: #f3f3f3; /* 背景颜色 */
+                box-shadow: inset 0px 5px 10px rgba(0, 0, 0, 0.3),
+                    inset 5px 0px 10px rgba(0, 0, 0, 0.3),
+                    inset 0px -5px 10px rgba(0, 0, 0, 0.3),
+                    inset -5px 0px 10px rgba(0, 0, 0, 0.3),
+                    0px -5px 10px rgba(255, 255, 255, 1);
+                border-radius: 100%;
+                position: relative;
+            }
+            .handle {
+                position: absolute;
+                border-radius: 100%;
+                width: 100px;
+                height: 100px;
+                background: #f0f0f0;
+                box-shadow: inset -5px 0px 10px rgba(0, 0, 0, 0.3),
+                    0px -5px 10px rgba(255, 255, 255, 1);
+                pointer-events: none;
+            }
+            .container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 640px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="bg">
+                <div class="handle"></div>
+            </div>
+        </div>
+
+        <script type="module" src="src/main.ts"></script>
+    </body>
+</html>
