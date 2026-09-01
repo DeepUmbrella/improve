@@ -1,0 +1,370 @@
+# 地图与移动数据模型设计
+
+## 目标
+
+为一款即时制游戏定义类型安全的数据模型。游戏采用基于网格的移动规则与平滑的视觉插值，并支持多种地形、有状态的障碍物、怪物、可独立承受伤害的载具以及场景切换。
+
+## 范围
+
+本设计涵盖静态地图数据、公共与副本地图的运行时状态、动态实体、通行与速度解析、载具占位、可交互的门和楼梯、不可见边界以及并发场景切换触发器。首版实现不包含渲染、战斗伤害计算、寻路算法、持久化格式和网络传输。
+
+所有内容类别均使用 TypeScript 枚举。因此，新增地形、障碍物、怪物或载具时，需要修改代码并重新构建。
+
+## 混合架构原则
+
+地图采用“分层网格数据 + 动态实体 ECS”的混合架构。地形、静态设施、格子边和触发器继续使用适合空间查询的地图结构；玩家、NPC、怪物、载具以及具有独立生命周期或复杂行为的对象使用 ECS。普通可破坏树木和门使用地图定义加实例状态；会移动、攻击或拥有复杂行为的机关与障碍物可以建模为 ECS 实体。
+
+## 空间模型
+
+玩法规则使用整数网格坐标。视觉移动在相邻格子之间进行插值，从而在保持平滑渲染的同时，避免把碰撞与寻路变成连续坐标问题。
+
+```typescript
+export interface GridPosition {
+    x: number;
+    y: number;
+}
+
+export enum Direction {
+    North,
+    East,
+    South,
+    West,
+}
+```
+
+一个格子可以容纳多个实体。移动实体开始移动时，只会针对与自己发生碰撞的实体预留目标格；在抵达之前，起点格仍保持占用。玩家永远不会阻挡其他玩家，即使任意一方正在驾驶载具也是如此。载具也不会阻挡玩家，因此玩家可以先与无人载具重叠，再执行上车操作。怪物与玩家则会互相阻挡。抵达后更新逻辑位置、释放起点占用，并执行 `Enter` 触发器。
+
+## 静态地图图层
+
+一个格子并不是在地形和障碍物之间二选一。地形是必需的密集图层；设施、边和触发器则是叠加在其上的稀疏实例集合。
+
+```typescript
+export interface GameMapDefinition {
+    id: string;
+    width: number;
+    height: number;
+    terrain: Terrain[][];
+    features: MapFeature[];
+    edges: MapEdge[];
+    triggers: MapTrigger[];
+}
+```
+
+服务器只为每张地图加载一份 `GameMapDefinition`。运行时状态单独保存在地图实例中。城镇和世界地图使用一个全体玩家共享的公共实例；战斗内容则可以基于同一份定义创建多个彼此隔离的实例。
+
+```typescript
+export enum MapInstanceKind {
+    Public,
+    Combat,
+}
+
+export interface MapInstance {
+    id: string;
+    definitionId: string;
+    kind: MapInstanceKind;
+    entityIds: Set<EntityId>;
+    featureStates: Record<string, FeatureRuntimeState>;
+    edgeStates: Record<string, EdgeRuntimeState>;
+}
+
+export interface FeatureRuntimeState {
+    durability?: Durability;
+}
+
+export interface EdgeRuntimeState {
+    doorState?: DoorState;
+    durability?: Durability;
+}
+```
+
+可变的门状态和耐久度属于 `MapInstance`，地图定义只提供初始值。因此，在一个战斗副本中打开门或破坏障碍物，不会修改其他副本或共享地图定义。
+
+### 地形
+
+每个格子恰好拥有一种天然表面。地形决定可使用哪些移动方式，以及对应的速度倍率。
+
+```typescript
+export enum Terrain {
+    Road,
+    Grass,
+    Water,
+    Sand,
+}
+```
+
+### 设施与障碍物
+
+设施是位于格子内部的对象。障碍物和楼梯使用不同的联合类型成员，因此无法表示“岩石必须带有场景触发器”这类无效组合。
+
+```typescript
+export enum Obstacle {
+    Rock,
+    Tree,
+    Bush,
+    Stone,
+}
+
+export interface Durability {
+    current: number;
+    maximum: number;
+}
+
+export type MapFeature = ObstacleFeature | StairsFeature;
+
+export interface ObstacleFeature {
+    kind: "obstacle";
+    id: string;
+    obstacle: Obstacle;
+    position: GridPosition;
+    initialDurability?: Durability;
+}
+
+export interface StairsFeature {
+    kind: "stairs";
+    id: string;
+    position: GridPosition;
+}
+```
+
+只有可破坏的设施实例才拥有 `durability`。某种障碍物是否会阻挡特定移动方式，由集中的障碍物规则表定义，而不是在每个实例上重复保存。
+
+### 格子边
+
+墙、门、地图边界和场景切换边界位于两个相邻格子之间。一条边由起点位置和方向标识。加载器会把相反方向的描述规范化，并拒绝 `(2, 3, East)` 与 `(3, 3, West)` 这类重复定义。
+
+```typescript
+export enum DoorState {
+    Open,
+    Closed,
+    Locked,
+    Destroyed,
+}
+
+export type MapEdge = WallEdge | DoorEdge | BoundaryEdge | TransitionEdge;
+
+export interface BaseMapEdge {
+    id: string;
+    position: GridPosition;
+    direction: Direction;
+    visible: boolean;
+}
+
+export interface WallEdge extends BaseMapEdge {
+    kind: "wall";
+}
+
+export interface DoorEdge extends BaseMapEdge {
+    kind: "door";
+    initialState: DoorState;
+    initialDurability?: Durability;
+}
+
+export interface BoundaryEdge extends BaseMapEdge {
+    kind: "boundary";
+}
+
+export interface TransitionEdge extends BaseMapEdge {
+    kind: "transition";
+}
+```
+
+隐藏的 `BoundaryEdge` 是不可见墙。隐藏的 `TransitionEdge` 是不可见的场景出口。门能否通行由其状态决定：打开和已破坏的门允许通过；关闭和上锁的门不允许通过。
+
+## 触发器与场景切换
+
+触发器独立于视觉或碰撞分类来描述行为。它们可以附着在格子、设施或边上，并支持进入时自动触发或主动交互触发。
+
+```typescript
+export enum TriggerActivation {
+    Enter,
+    Interact,
+}
+
+export type TriggerSource =
+    | { kind: "cell"; position: GridPosition }
+    | { kind: "feature"; featureId: string }
+    | { kind: "edge"; edgeId: string };
+
+export interface MapTrigger {
+    id: string;
+    activation: TriggerActivation;
+    source: TriggerSource;
+    action: SceneTransitionAction;
+}
+
+export interface SceneTransitionAction {
+    kind: "scene-transition";
+    destination: {
+        mapDefinitionId: string;
+        position: GridPosition;
+        facing?: Direction;
+    };
+}
+```
+
+楼梯是被触发器引用的 `StairsFeature`。建筑入口可以是被触发器引用的 `DoorEdge`。不可见出口则是被 `Enter` 触发器引用的隐藏 `TransitionEdge`。
+
+## 动态实体 ECS
+
+玩家、NPC、怪物和载具使用 ECS 组件组合，不会被序列化到静态地图格子中。实体本身只有 ID；位置、移动、碰撞、生命值和身份由独立组件描述。
+
+```typescript
+export type EntityId = string;
+
+export interface PositionComponent {
+    mapInstanceId: string;
+    position: GridPosition;
+}
+
+export interface MovementComponent {
+    profile: MovementProfile;
+}
+
+export enum CollisionCategory {
+    Player,
+    Npc,
+    Monster,
+    Vehicle,
+}
+
+export interface CollisionComponent {
+    category: CollisionCategory;
+    blocks: readonly CollisionCategory[];
+}
+
+export interface HealthComponent {
+    current: number;
+    maximum: number;
+}
+
+export interface PlayerComponent {
+    playerId: string;
+}
+
+export interface MonsterComponent {
+    monsterType: MonsterType;
+}
+
+export interface VehicleComponent {
+    vehicleType: VehicleType;
+    driverEntityId?: EntityId;
+}
+
+export interface VehiclePassengerComponent {
+    vehicleEntityId: EntityId;
+}
+```
+
+`PositionComponent` 是实体直接位于某地图实例和逻辑格位置的唯一权威数据。车内实体通过 `VehiclePassengerComponent` 和载具的位置间接归属于地图实例。`MapInstance.entityIds` 是根据直接位置与包含关系生成的派生索引；创建、移动、上下车、传送或删除实体时，服务器必须在同一事务中更新相关组件与该索引。占位索引只由拥有直接位置的实体及其碰撞组件派生，车内角色不会单独占格。
+
+首版中，无论渲染尺寸多大，所有带位置组件的实体都只占一个逻辑格。角色登上载具后移除自己的 `PositionComponent`，添加 `VehiclePassengerComponent`，同时载具的 `VehicleComponent.driverEntityId` 指向该角色。载具保留位置、生命和独立受击能力。角色下车时移除乘客组件，并在载具所在格或相邻有效格添加位置组件。
+
+碰撞系统查询 `CollisionComponent`，并结合玩家与载具组件识别玩家控制的移动主体。玩家彼此不阻挡；玩家驾驶的载具之间也不阻挡；载具不阻挡玩家；怪物与玩家互相阻挡。NPC 的阻挡行为由各自碰撞组件配置。
+
+## 即时移动规则
+
+移动方式描述实体的物理通行能力。`Run` 不属于移动方式，因为它只是地面移动的一种临时速度状态。
+
+```typescript
+export enum MovementMode {
+    Ground,
+    Wheeled,
+    Tracked,
+    Swim,
+    Naval,
+    Fly,
+}
+
+export interface MovementProfile {
+    speeds: Partial<Record<MovementMode, number>>;
+}
+
+export type TerrainMovementRules = Record<
+    Terrain,
+    Partial<Record<MovementMode, number>>
+>;
+```
+
+移动配置中的数值表示每秒移动的格数。地形规则中的数值为正数倍率。缺少某个移动方式的条目，表示该方式无法进入此地形。解析器会从实体配置与目标地形共同支持的移动方式中选择最快的一种，然后进行如下计算：
+
+```text
+实际速度 = 移动方式基础速度 * 地形倍率 * 状态倍率
+```
+
+障碍物和格子边规则可以排除原本有效的移动方式。例如，水面可以支持 `Swim` 和 `Naval`，道路可以提高 `Wheeled` 的速度，坦克可以提供 `Tracked`，而飞行怪物可以忽略明确允许 `Fly` 通过的地面障碍物。
+
+进入相邻格子时，按以下顺序解析移动：
+
+1. 确认起点与终点相邻，并且均位于地图范围内。
+2. 解析两格之间共享的边及其当前状态。
+3. 找出实体与目标地形共同支持的移动方式。
+4. 移除被目标格设施阻挡的移动方式。
+5. 根据实体 ID 查询移动者和目标格占用者的碰撞与身份组件；只有存在会发生碰撞的实体时才拒绝移动。
+6. 选择剩余方式中实际速度最快的一种，并添加一条感知碰撞规则的移动预留。
+7. 在 `1 / effectiveSpeed` 秒内对视觉位置进行插值。
+8. 提交逻辑位置，并执行匹配的 `Enter` 触发器。
+
+`Interact` 触发器只有玩家实体与其来源相邻，并发出明确的交互命令时才会执行。载具被驾驶时，移动系统处理拥有位置和载具组件的载具实体；拥有对应乘客组件的角色会跟随它完成地图移动和场景切换。
+
+## 多人场景切换
+
+触发器是不可变规则，可以被并发执行。每次触发都会创建一条相互独立且具备幂等性的场景切换请求。
+
+```typescript
+export interface SceneTransitionRequest {
+    requestId: string;
+    entityId: string;
+    sourceInstanceId: string;
+    target: {
+        mapDefinitionId: string;
+        mapInstanceId?: string;
+        position: GridPosition;
+    };
+}
+```
+
+对于公共地图，目标实例是该地图的公共实例；对于战斗地图，目标可以是服务器策略明确选择的已有战斗实例，也可以是新创建的战斗实例。多个玩家可以同时触发同一个传送器并抵达同一个坐标，因为玩家之间不会发生移动碰撞。重复提交已接受的 `requestId` 时，服务器返回第一次请求的结果，而不会再次执行传送。
+
+## 验证与失败处理
+
+出现以下情况时，地图加载会拒绝数据：
+
+- 地形数组尺寸与地图的宽度和高度不一致。
+- 设施、边、触发器来源或当前地图内的切换目标超出地图范围。
+- ID 重复，或触发器引用了不存在的设施或边。
+- 两个相反方向的描述定义了同一条边。
+- 耐久度为负数、超过最大值，或者最大值不是正数。
+- 速度或地形倍率不是有限正数。
+- 载具的驾驶者 ID 没有引用拥有玩家组件的实体，乘客与载具引用不一致，或者一个角色同时驾驶多辆载具。
+- 位置组件引用不存在的地图实例，或地图实例引用不存在的地图定义。
+- `MapInstance.entityIds` 与位置组件及载具包含关系推导出的实例归属不一致。
+- 设施或边的运行时状态引用了当前实例定义中不存在的 ID。
+
+跨地图目标坐标会在目标地图定义加载时验证。如果场景切换失败，移动实体、其乘客以及所有占位预留都会保留在原地图实例中，不会提交部分完成的切换状态。服务器会按策略保留场景切换请求 ID，避免请求重试导致已完成的传送被重复执行。
+
+## 测试
+
+专项测试将覆盖：
+
+- 密集地形图层尺寸和稀疏图层坐标验证。
+- 反向边重复定义检测。
+- 门在打开、关闭、上锁和已破坏状态下的通行规则。
+- `Ground`、`Wheeled`、`Tracked`、`Swim`、`Naval` 和 `Fly` 的地形解析。
+- 障碍物过滤与可破坏设施状态。
+- 单格多实体占位，以及平滑移动期间感知碰撞规则的目标格预留。
+- 玩家步行或驾驶载具时与其他玩家重叠。
+- 玩家与有人或无人的载具重叠，以及玩家与怪物互相阻挡。
+- 位置组件、地图实例实体索引与占位索引的一致性。
+- 固定或移动 NPC 的可配置碰撞行为。
+- 楼梯的 `Enter` 和 `Interact` 行为。
+- 隐藏的阻挡边界与隐藏的场景切换边界。
+- 多个玩家并发传送到同一个目标格。
+- 场景切换重试的幂等性、成功切换与失败回滚。
+- 公共实例共享与战斗副本状态隔离。
+- 载具的上车、驾驶、伤害目标、场景切换以及向相邻格下车。
+
+## 从当前类型迁移
+
+当前的 `MapCell.tile` 与 `MapCell.value` 联合结构将被移除，因为它不允许地形与设施共存。`Map` 将更名为 `GameMapDefinition`，既避免与 JavaScript 内置的 `Map` 混淆，也能区分不可变地图数据与 `MapInstance` 运行时状态。`MoveMentType`、`Movement` 和 `MoveMentRule` 将由命名正确的移动组件、地形规则、障碍物规则和移动系统取代。
+
+`CharacterEntity | MonsterEntity | VehicleEntity` 联合类型将逐步迁移为 ECS 组件组合。迁移期间可使用适配器让现有移动、占位、传送和载具服务从组件查询接口读取数据。静态 `Terrain`、`MapFeature`、`MapEdge`、`MapTrigger`、`GameMapDefinition` 和 `MapInstance` 保持分层地图结构，不转换成 ECS 实体。完整 NPC 组件与交互边界见 `2026-08-31-npc-ecs-data-model-design.zh-CN.md`。
